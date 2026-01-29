@@ -10,6 +10,7 @@ from sklearn.metrics import mean_squared_error, r2_score
 from sklearn.tree import DecisionTreeClassifier, DecisionTreeRegressor
 from sklearn.neighbors import KNeighborsClassifier, KNeighborsRegressor
 from sklearn.ensemble import RandomForestClassifier, RandomForestRegressor
+from sklearn.naive_bayes import GaussianNB
 
 from sklearn.datasets import load_iris
 
@@ -58,7 +59,7 @@ h1, h2, h3, h4, h5, h6, p, label, .stText {
 # TITLE
 # -------------------------------------------------
 st.markdown("<h1 style='text-align:center; color:#ffffff;'>🚀 Interactive ML App</h1>", unsafe_allow_html=True)
-st.markdown("<p style='text-align:center; color:#f0f0f0;'>Classification & Regression with Decision Tree, KNN, Ensemble</p>", unsafe_allow_html=True)
+st.markdown("<p style='text-align:center; color:#f0f0f0;'>Classification & Regression with Decision Tree, KNN, Ensemble, Naive Bayes</p>", unsafe_allow_html=True)
 
 # -------------------------------------------------
 # SIDEBAR
@@ -66,7 +67,12 @@ st.markdown("<p style='text-align:center; color:#f0f0f0;'>Classification & Regre
 st.sidebar.header("⚙️ Model Configuration")
 
 task_type = st.sidebar.selectbox("Select Task Type", ["Classification", "Regression"])
-model_type = st.sidebar.selectbox("Select Algorithm", ["Decision Tree", "KNN", "Ensemble"])
+
+# Add Naive Bayes only for Classification
+if task_type == "Classification":
+    model_type = st.sidebar.selectbox("Select Algorithm", ["Decision Tree", "KNN", "Ensemble", "Naive Bayes"])
+else:
+    model_type = st.sidebar.selectbox("Select Algorithm", ["Decision Tree", "KNN", "Ensemble"])
 
 st.sidebar.subheader("Dataset Selection")
 dataset_choice = st.sidebar.radio("Choose Dataset", ["Use Iris Dataset (built-in)", "Upload your CSV"])
@@ -120,9 +126,11 @@ if model_type == "Decision Tree":
 elif model_type == "KNN":
     k = st.sidebar.slider("K Neighbors", 1, 15, 5)
     model = KNeighborsClassifier(n_neighbors=k) if task_type == "Classification" else KNeighborsRegressor(n_neighbors=k)
-else:  # Ensemble
+elif model_type == "Ensemble":
     trees = st.sidebar.slider("Number of Trees", 10, 200, 100)
     model = RandomForestClassifier(n_estimators=trees) if task_type == "Classification" else RandomForestRegressor(n_estimators=trees)
+elif model_type == "Naive Bayes":
+    model = GaussianNB()
 
 # -------------------------------------------------
 # TRAIN MODEL
@@ -140,7 +148,8 @@ st.subheader("📈 Model Results")
 
 if task_type == "Classification":
     acc = accuracy_score(y_test, y_pred)
-    st.metric("Accuracy", round(acc, 4))
+    st.metric("Accuracy", f"{round(acc*100, 2)} %")
+
 
     st.subheader("📄 Classification Report")
     report = classification_report(y_test, y_pred, output_dict=True)
